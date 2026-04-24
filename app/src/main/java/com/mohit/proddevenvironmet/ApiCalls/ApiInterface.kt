@@ -1,6 +1,7 @@
 package com.mohit.proddevenvironmet.ApiCalls
 
 import com.google.gson.JsonObject
+import com.mohit.proddevenvironmet.Screens.LoginScreen.LoginResponseModel
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -10,11 +11,13 @@ import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.PartMap
+import retrofit2.http.Url
 
 interface ApiInterface {
     @FormUrlEncoded
-    @POST("dms_login")
+    @POST
     suspend fun getLogin(
+        @Url url : String,
 //        @Field("v_name") v_name: String,
 //        @Field("v_code") v_code: Int,
 //        @Field("uname") uname: String,

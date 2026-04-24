@@ -13,23 +13,27 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.mohit.proddevenvironmet.ApiResponseHandler.ApiResult
 import com.mohit.proddevenvironmet.BuildConfig
+import com.mohit.proddevenvironmet.CommonConstants.Constants
 import com.mohit.proddevenvironmet.RoomDataBase.Table.ModuleEntity
 
 @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @Composable
 fun MainScreen(viewModel: UserViewModel = hiltViewModel()) {
     val baseurl = BuildConfig.BASE_URL
-    val context = LocalContext.current
     val userlist by viewModel.users.observeAsState(emptyList())
-    val loading by viewModel.loading.observeAsState(false)
+    val state = viewModel.state.collectAsState()
+      val result = state.value
     val modulelist by viewModel.modules.observeAsState(emptyList())
+    val url = "dms_login"
     val username = "121213@bhaskar"
     val pass = "121213"
     val vname = "2.0.1"
@@ -42,34 +46,43 @@ fun MainScreen(viewModel: UserViewModel = hiltViewModel()) {
         body["uname"] = username
         body["pass"] = pass
         body["token"] = token
-        viewModel.fetchUsers(body,context)
+        viewModel.fetchUsers(body,url)
     }
-    if (loading) {
-        CircularProgressIndicator()
-    } else {
+    when(result){
+        is ApiResult.Loading -> {
+            Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator()
+            }
+        }
+        is ApiResult.Error ->{
+            val message = result.message
+            Constants.CustomToast(message,1)
+        }
+        else -> {}
 
-        val user = userlist.firstOrNull()
-        Column(Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(text = baseurl)
-            Text(text = "Name: ${user?.name ?: ""}")
-            Text(text = "Email: ${user?.email ?: ""}")
-            Text(text = "State: ${user?.statename ?: ""}")
-            Log.d("data", user?.email.toString())
-            Log.d("data", modulelist.toString())
-            LazyColumn(Modifier.fillMaxWidth()) {
-                items(modulelist){ item ->
-                   data(item)
-                }
+
+    }
+    val user = userlist.firstOrNull()
+    Column(Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = baseurl)
+        Text(text = "Name: ${user?.name ?: ""}")
+        Text(text = "Email: ${user?.email ?: ""}")
+        Text(text = "State: ${user?.statename ?: ""}")
+        Log.d("data", user?.email.toString())
+        Log.d("data", modulelist.toString())
+        LazyColumn(Modifier.fillMaxWidth()) {
+            items(modulelist){ item ->
+                Data(item)
             }
         }
     }
 }
 
 @Composable
-fun data(item: ModuleEntity){
+fun Data(item: ModuleEntity){
     val imageurl = BuildConfig.IMAGE_URL
     val fullurl = imageurl + item.icon
 
@@ -80,9 +93,4 @@ fun data(item: ModuleEntity){
         Text("id : ${item.id}")
         Text("icon url : $fullurl")
     }
-}
-
-@Composable
-fun loadingScreen() {
-
 }

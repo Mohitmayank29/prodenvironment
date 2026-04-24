@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,6 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.mohit.proddevenvironmet.ApiResponseHandler.ApiResult
+import com.mohit.proddevenvironmet.CommonConstants.Constants
 import com.mohit.proddevenvironmet.Components.CameraScreen
 import com.mohit.proddevenvironmet.Components.FilePickerBottomSheet
 import com.mohit.proddevenvironmet.Components.createMultipart
@@ -52,6 +55,8 @@ fun SubmitScreen( viewModel: SubmitViewModel = hiltViewModel()) {
     val scope = rememberCoroutineScope()
     val packagename = "image_source"
     val orderId = ""
+    val state = viewModel.state
+    val result = state.value
     val body = mutableMapOf<String, String>()
     body["order_id"] = orderId
     var openCamera by remember { mutableStateOf(false) }
@@ -129,6 +134,24 @@ fun SubmitScreen( viewModel: SubmitViewModel = hiltViewModel()) {
                 fileLauncher.launch(arrayOf("*/*"))
             }
         )
+
+    }
+    when(result){
+        is ApiResult.Loading -> {
+            CircularProgressIndicator()
+        }
+        is ApiResult.Success -> {
+
+        }
+        is ApiResult.Error -> {
+            val message = result.message
+            Constants.CustomToast(message,1)
+        }
+        else -> {
+            Constants.CustomToast("Error",1)
+
+        }
+
 
     }
     Column(Modifier.fillMaxSize()
