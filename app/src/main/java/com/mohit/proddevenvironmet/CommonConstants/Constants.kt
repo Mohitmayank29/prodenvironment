@@ -20,6 +20,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.mohit.proddevenvironmet.ApiResponseHandler.ApiResult
 import com.mohit.proddevenvironmet.NoInternet.NoInternetException
 import com.mohit.proddevenvironmet.R
@@ -30,8 +32,8 @@ import java.net.UnknownHostException
 
 object Constants {
     private const val TAG = "FileFlow"
-    suspend fun <T> safeapicall(
-        apicall :suspend () -> Response<T>
+    suspend inline fun <reified T> safeapicall(
+      crossinline  apicall :suspend () -> Response<JsonObject>
 
     ) : ApiResult<T> {
         return try {
@@ -40,12 +42,32 @@ object Constants {
             Log.d("API_RESPONSE", response.body().toString())
             Log.d("API_RESPONSE", response.code().toString())
             Log.d("API_RESPONSE", response.message().toString())
-            val body = response.body()
 
             if (response.isSuccessful && response.body() != null) {
+                val jsonObject = response.body()!!
+                Log.d("RAW_JSON", jsonObject.toString())
+
+                 val isSuccess = when {
+                    jsonObject.has("response") -> jsonObject.get("response").asBoolean
+                    jsonObject.has("status") -> jsonObject.get("status").asBoolean
+                    jsonObject.has("code") -> jsonObject.get("code").asInt == 200
+                    else -> true
+                }
+
+                val message = when {
+                    jsonObject.has("message") -> jsonObject.get("message").asString
+                    jsonObject.has("msg") -> jsonObject.get("msg").asString
+                    else -> "Something went wrong"
+                }
+                if (!isSuccess) {
+                    return ApiResult.Error(message)
+                }
 //                Log.d("response",)
                 if (response.code() == 200) {
-                    ApiResult.Success(response.body())
+
+                    val data: T = Gson().fromJson(jsonObject, T::class.java)
+
+                    ApiResult.Success(data)
                 }else {
                     ApiResult.Error(response.message())
                 }
@@ -71,8 +93,7 @@ object Constants {
               }
 
             }
-        }
-        catch (e : Exception){
+        }catch (e : Exception){
             ApiResult.Error(
                 when (e) {
                     is NoInternetException -> "No Internet Connection"
@@ -101,35 +122,35 @@ object Constants {
             }
         }
     }
-//    @Composable
-//    fun CustomToast(
-//        message: String,
-//        type: Int) {
-//        val icon = when (type) {
-//            0 -> R.drawable.ic_launcher_foreground
-//            1 -> R.drawable.ic_launcher_foreground
-//            2 -> R.drawable.ic_launcher_foreground
-//            else -> R.drawable.ic_launcher_foreground
-//        }
-//        Row( Modifier
-//                .padding(16.dp)
-//                .background(Color.Black, shape = RoundedCornerShape(12.dp))
-//                .padding(horizontal = 16.dp, vertical = 10.dp),
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            Image(
-//                painter = painterResource(id = icon),
-//                contentDescription = null,
-//                modifier = Modifier.size(24.dp)
-//            )
-//            Spacer(modifier = Modifier.width(8.dp))
-//            Text(
-//                text = message,
-//                color = Color.White,
-//                fontSize = 14.sp
-//            )
-//        }
-//    }
+    @Composable
+    fun CustomToast(
+        message: String,
+        type: Int) {
+        val icon = when (type) {
+            0 -> R.drawable.ic_launcher_foreground
+            1 -> R.drawable.ic_launcher_foreground
+            2 -> R.drawable.ic_launcher_foreground
+            else -> R.drawable.ic_launcher_foreground
+        }
+        Row( Modifier
+                .padding(16.dp)
+                .background(Color.Black, shape = RoundedCornerShape(12.dp))
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(id = icon),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = message,
+                color = Color.White,
+                fontSize = 14.sp
+            )
+        }
+    }
 }
 
 object SessionManager {

@@ -17,8 +17,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SessionHandler()
-            SubmitScreen()
-//            MainScreen()
+//            SubmitScreen()
+            MainScreen()
         }
     }
 }
