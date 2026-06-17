@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.mohit.proddevenvironmet.ApiResponseHandler.ApiResult
+import com.mohit.proddevenvironmet.BudgetLoaderScreen
 import com.mohit.proddevenvironmet.BuildConfig
 import com.mohit.proddevenvironmet.CommonConstants.Constants
 import com.mohit.proddevenvironmet.RoomDataBase.Table.ModuleEntity
@@ -50,8 +51,11 @@ fun MainScreen(viewModel: UserViewModel = hiltViewModel()) {
     }
     when(result){
         is ApiResult.Loading -> {
-            Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                CircularProgressIndicator()
+            Column(Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                BudgetLoaderScreen()
             }
         }
         is ApiResult.Error ->{

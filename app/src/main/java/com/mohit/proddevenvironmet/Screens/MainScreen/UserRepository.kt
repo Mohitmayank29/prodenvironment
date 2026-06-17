@@ -61,7 +61,7 @@ class UserRepository @Inject constructor (
                     //                            name = obj.get("module_name")?.asString.toString(),
                     //                            moduleurl = obj.get("module_url")?.asString.toString(),
                             )
-                        } ?: emptyList()
+                        }
                         Log.d("STEP_1", "Before delete")
                         userDao.deleteAllUsers()
                         Log.d("STEP_2", "After delete")

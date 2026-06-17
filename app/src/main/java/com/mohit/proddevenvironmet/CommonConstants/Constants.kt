@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.mohit.proddevenvironmet.ApiCalls.ApiInterface
 import com.mohit.proddevenvironmet.ApiResponseHandler.ApiResult
 import com.mohit.proddevenvironmet.NoInternet.NoInternetException
 import com.mohit.proddevenvironmet.R
@@ -34,8 +35,8 @@ object Constants {
     private const val TAG = "FileFlow"
     suspend inline fun <reified T> safeapicall(
       crossinline  apicall :suspend () -> Response<JsonObject>
-
     ) : ApiResult<T> {
+        val api : ApiInterface
         return try {
             val response = apicall()
             Log.d("API_URL", response.raw().request.url.toString())
